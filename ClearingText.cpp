@@ -162,6 +162,14 @@ long ClearingText(unsigned char* buffer, long lenght){
         flag_write = 1;
 
     }
+    printf("buffer %c\n", buffer[newtext-7]);
+    printf("buffer %c\n", buffer[newtext-6]);
+    printf("buffer %c\n", buffer[newtext-5]);
+    printf("buffer %c\n", buffer[newtext-4]);
+    printf("buffer %c\n", buffer[newtext-3]);
+    printf("buffer %c\n", buffer[newtext-2]);
+    printf("buffer %c\n", buffer[newtext-1]);
+    printf("buffer %c\n", buffer[newtext]);
     buffer[newtext] = 0;
-    return newtext + 1;
+    return newtext;
 }
