@@ -9,7 +9,7 @@
 #include "Functions.cpp"
 
 //------File which we read----------//
-const char* NAME_FILE = "Onegin.txt";
+const char* NAME_FILE = "Oneginqq.txt";
 //----------------------------------//
 
 
@@ -76,7 +76,7 @@ int main()
 
     FILE* newfile = fopen("Onegin_clear.txt", "w+");
     fwrite(buffer, sizeof(unsigned char),newlength, newfile);
-    fclose(newfile);
+
 
     num_enter++; // because has +1 string
 
@@ -84,6 +84,12 @@ int main()
     FillStruct(strings, buffer, newlength, num_enter);
 
     QuickSort(strings, num_enter);
+
+    FILE* sortfile = fopen("Onegin_sort.txt", "w+");
+
+    for (int i = 0; i < num_enter; i++){
+        fwrite(strings[i].pointer, sizeof(unsigned char), strings[i].length, sortfile);
+    }
 
 //    for (int i = 0; i < num_enter; i++){
 //        printf("%ld \n", strings[i].length);
@@ -95,6 +101,8 @@ int main()
 //    QuickSort(strings, num_enter);
 
     printf("num_enter = %ld", num_enter);
+    fclose(sortfile);
+    fclose(newfile);
     free(buffer);
     fclose(file);
     return 0;

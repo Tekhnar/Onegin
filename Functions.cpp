@@ -29,14 +29,9 @@ void FillStruct(struct pointer_buffer strings[], unsigned char buffer[], long ne
     }
 }
 
-void QuickSort(struct pointer_buffer strings[], long many/*, int (*c)(const void* , const void*)*/);
-int Compar(struct pointer_buffer left, struct pointer_buffer right);
-void Swap(struct pointer_buffer strings[], long left, long right);
-int ConvertToMyChar (unsigned char in);
-int IsNotLetter(unsigned char input);
 
-void QuickSort(struct pointer_buffer strings[], long many/*, int (*c)(const int* , const int*)*/){
-    //assert(arr == 0);
+void QuickSort(struct pointer_buffer strings[], long many){
+    assert(strings[0].length != 0);
     long right = many;
     long left = 0;
     long mid = (many-1)/2;
@@ -55,7 +50,7 @@ void QuickSort(struct pointer_buffer strings[], long many/*, int (*c)(const int*
         }
     } while (left <= right);
     //printf("%d %d\n", left, right);
-    assert(left != right);
+    //assert(left != right);
     if (right > 0) QuickSort(strings, right);
     if (left < many) QuickSort(&strings[left], (many - 1) - left);
 //    for (int i = 0; i < many; i++){
@@ -67,15 +62,19 @@ void QuickSort(struct pointer_buffer strings[], long many/*, int (*c)(const int*
 
 int Compar(struct pointer_buffer left, struct pointer_buffer right){
 
-    long minim = left.length;
+    long minim = left.length +1;
     if (right.length < minim) minim = right.length;
-
+    //printf("Is right.pointer[j] - %p \n", right.pointer);
     long j = 0;
-    for (long i = 0; i < minim; i++){
-        while(IsNotLetter(left.pointer[i])) i++;
-        while(IsNotLetter(right.pointer[j])) j++;
+    for (long i = 0; (i < minim) && (j < minim); i++){
 
+        while(IsNotLetter(left.pointer[i]) && (i < minim)) i++;
+        //printf("Is right.pointer[j] - %c \n", left.pointer[i]);
+        while(IsNotLetter(right.pointer[j]) && (j < minim)) j++;
+
+//        printf("First char - %c Second char - %c\n", left.pointer[i], *right.pointer[i] );
         if (ConvertToMyChar(left.pointer[i]) < ConvertToMyChar(right.pointer[j])) return 1;
+        if (ConvertToMyChar(left.pointer[i]) > ConvertToMyChar(right.pointer[j])) return 0;
         j++;
     }
     if (right.length > minim) return 1;
@@ -86,11 +85,20 @@ int Compar(struct pointer_buffer left, struct pointer_buffer right){
 
 void Swap(struct pointer_buffer strings[], long left, long right){
     struct pointer_buffer temp;
-   // printf("lenght before %d", strings[left].length);
-    temp = strings[left];
-    strings[left] = strings[right];
-    strings[right] = temp;
-   // printf("lenght after %d\n", strings[left].length);
+   // printf("lenght before %d ", strings[left].pointer);
+    temp.length = strings[left].length;
+    temp.pointer = strings[left].pointer;
+
+    strings[left].length = strings[right].length;
+    strings[left].pointer = strings[right].pointer;
+
+    strings[right].length = temp.length;
+    strings[right].pointer = temp.pointer;
+
+
+    //strings[left] = strings[right];
+    //strings[right] = temp;
+    //printf("lenght after %d\n", strings[left].pointer);
 }
 
 
@@ -116,7 +124,7 @@ int ConvertToMyChar (unsigned char in){
 
 }
 
-int IsNotLetter(unsigned char input){
+/*int IsNotLetter(unsigned char input){
     if ((input <= 47)
         || (input >= 58 && input <= 64)
         || (input >= 91 && input <= 96)
@@ -124,4 +132,16 @@ int IsNotLetter(unsigned char input){
         || (input >= 169 && input <= 183)
         || (input >= 185 && input <= 191)) return 1;
             else return 0;
+}*/
+
+int IsNotLetter(unsigned char input){
+    if (   (input >= 65 && input <= 90)
+        || (input >= 192 && input <= 197)
+        || (input >= 224 && input <= 229)
+
+        || (input == 168 || input == 184)
+        || (input >= 169 && input <= 183)
+        || (input >= 198 && input <= 223)
+        || (input >= 230 && input <= 255)) return 0;
+            else return 1;
 }

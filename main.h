@@ -7,6 +7,12 @@ long HowEnter(unsigned char* buffer, long newlength);
 long ClearingText(unsigned char* buffer, long lenght);
 void FillStruct(struct pointer_buffer strings[], unsigned char buffer[], long newlength, long num_enter);
 
+void QuickSort(struct pointer_buffer strings[], long many);
+int Compar(struct pointer_buffer left, struct pointer_buffer right);
+void Swap(struct pointer_buffer strings[], long left, long right);
+int ConvertToMyChar (unsigned char in);
+int IsNotLetter(unsigned char input);
+
 struct pointer_buffer {
     unsigned char* pointer;
     long length;

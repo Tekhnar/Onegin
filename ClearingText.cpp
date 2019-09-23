@@ -162,7 +162,7 @@ long ClearingText(unsigned char* buffer, long lenght){
         flag_write = 1;
 
     }
-    buffer[newtext] = 0;
+    buffer[newtext] = '\n';
 
     return newtext;
 }
