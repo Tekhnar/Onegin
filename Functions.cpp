@@ -29,55 +29,99 @@ void FillStruct(struct pointer_buffer strings[], unsigned char buffer[], long ne
     }
 }
 
-void QuickSort(const int* arr, int many/*, int (*c)(const void* , const void*)*/);
-int Compar(int left, int right);
-void Swap(int* left, int* right);
+void QuickSort(struct pointer_buffer strings[], long many/*, int (*c)(const void* , const void*)*/);
+int Compar(struct pointer_buffer left, struct pointer_buffer right);
+void Swap(struct pointer_buffer strings[], long left, long right);
+int ConvertToMyChar (unsigned char in);
+int IsNotLetter(unsigned char input);
 
-void QuickSort(int* arr, int many/*, int (*c)(const int* , const int*)*/){
+void QuickSort(struct pointer_buffer strings[], long many/*, int (*c)(const int* , const int*)*/){
     //assert(arr == 0);
-    int right = many;
-    int left = 0;
-    int mid = arr[(many-1)/2];
-    printf("mid - %d\n", mid);
+    long right = many;
+    long left = 0;
+    long mid = (many-1)/2;
+    //printf("mid - %ld\n", mid);
 
     do {
-        while (arr[left] < mid){
-            printf("arr[left] - %d left - %d\n", arr[left], left);
-            left++;
-        }
-        while (mid < arr[right]) {
-                right--;
-            printf("arr[right] - %d right - %d\n", arr[right], right);
-        }
+        while (Compar(strings[left], strings[mid])) left++;
+            //printf("arr[left] - left - %d\n", left);
+        while (Compar(strings[mid], strings[right])) right--;
+            //printf("arr[right] - %d right - %d\n", arr[right], right);
 
         if (left <= right) {
-                int temp = arr[left];
-                arr[left] = arr[right];
-                arr[right] = temp;
-            //Swap(&arr[left], &arr[right]);
+            Swap(strings, left, right);
             left++;
             right--;
         }
     } while (left <= right);
-    printf("%d %d\n", left, right);
+    //printf("%d %d\n", left, right);
     assert(left != right);
-    if (right > 0) QuickSort(arr, right);
-    if (left < many) QuickSort(arr + left, (many - 1) - left);
-    for (int i = 0; i < many; i++){
-        printf("%d ", arr[i]);
+    if (right > 0) QuickSort(strings, right);
+    if (left < many) QuickSort(&strings[left], (many - 1) - left);
+//    for (int i = 0; i < many; i++){
+//        printf("%d ", arr[i]);
+//    }
+//    printf("\n");
+}
+
+
+int Compar(struct pointer_buffer left, struct pointer_buffer right){
+
+    long minim = left.length;
+    if (right.length < minim) minim = right.length;
+
+    long j = 0;
+    for (long i = 0; i < minim; i++){
+        while(IsNotLetter(left.pointer[i])) i++;
+        while(IsNotLetter(right.pointer[j])) j++;
+
+        if (ConvertToMyChar(left.pointer[i]) < ConvertToMyChar(right.pointer[j])) return 1;
+        j++;
     }
-    printf("\n");
+    if (right.length > minim) return 1;
+
+    return 0;
+    //else return 0;
+}
+
+void Swap(struct pointer_buffer strings[], long left, long right){
+    struct pointer_buffer temp;
+   // printf("lenght before %d", strings[left].length);
+    temp = strings[left];
+    strings[left] = strings[right];
+    strings[right] = temp;
+   // printf("lenght after %d\n", strings[left].length);
 }
 
 
-int Compar(int left,int right){
-    if (left > right) return 1;
-    else return 0;
+int ConvertToMyChar (unsigned char in){
+    int input = in;
+    if (input >= 65 && input <= 90) {
+        input += 32;
+    //    return input;
+    }
+    else if ((input >= 192 && input <= 197) || (input >= 224 && input <= 229)) { // Russian char start from 300
+        input += 108;
+    //    return input;
+    }
+    else if (input == 168 || input == 184) {
+        input = 306;
+    //    return input;
+    }
+    else if ((input >= 198 && input <= 223) || (input >= 230 && input <= 255)){
+        input += 109;
+    }
+
+    return input;
+
 }
 
-void Swap(int* left, int* right){
-    int *temp;
-    *temp = *right;
-    *right = *left;
-    *left = *temp;
+int IsNotLetter(unsigned char input){
+    if ((input <= 47)
+        || (input >= 58 && input <= 64)
+        || (input >= 91 && input <= 96)
+        || (input >= 123 && input <= 167)
+        || (input >= 169 && input <= 183)
+        || (input >= 185 && input <= 191)) return 1;
+            else return 0;
 }

@@ -58,6 +58,16 @@ int main()
 
     long newlength = ClearingText(buffer, length);
     buffer = (unsigned char*) realloc(buffer, newlength);
+
+//    printf("buffer %c\n", buffer[newlength-7]);
+//    printf("buffer %c\n", buffer[newlength-6]);
+//    printf("buffer %c\n", buffer[newlength-5]);
+//    printf("buffer %c\n", buffer[newlength-4]);
+//    printf("buffer %c\n", buffer[newlength-3]);
+//    printf("buffer %c\n", buffer[newlength-2]);
+//    printf("buffer %c\n", buffer[newlength-1]);
+//    printf("buffer %c\n", buffer[newlength]);
+
     long num_enter = HowEnter(buffer, newlength);
     if (buffer == NULL){
         printf("ERROR in realloc()!\n");
@@ -68,14 +78,22 @@ int main()
     fwrite(buffer, sizeof(unsigned char),newlength, newfile);
     fclose(newfile);
 
+    num_enter++; // because has +1 string
+
     struct pointer_buffer strings[num_enter];
     FillStruct(strings, buffer, newlength, num_enter);
 
-    int arr[6] = {1, 10, 9, 8, 7, 6};
-    QuickSort(arr, 6);
-//    for (int i = 0; i < 6; i++){
-//        printf("%d ", arr[i]);
+    QuickSort(strings, num_enter);
+
+//    for (int i = 0; i < num_enter; i++){
+//        printf("%ld \n", strings[i].length);
 //    }
+//    for (unsigned char* i = strings[num_enter-1].pointer; i <  (strings[num_enter-1].pointer+7); i++){
+//        printf("%d ", *i);
+//    }
+    //int arr[6] = {1, 10, 9, 8, 7, 6};
+//    QuickSort(strings, num_enter);
+
     printf("num_enter = %ld", num_enter);
     free(buffer);
     fclose(file);
