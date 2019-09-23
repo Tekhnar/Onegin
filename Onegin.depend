@@ -1,0 +1,17 @@
+# depslib dependency file v1.0
+1569249797 source:d:\code\onegin\main.cpp
+	<stdio.h>
+	<stdlib.h>
+	<assert.h>
+	<windows.h>
+	<sys\stat.h>
+	"ClearingText.cpp"
+	"main.h"
+	"Functions.cpp"
+
+1569145680 d:\code\onegin\clearingtext.cpp
+
+1569155950 d:\code\onegin\main.h
+
+1569250894 d:\code\onegin\functions.cpp
+
