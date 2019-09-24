@@ -8,6 +8,7 @@
 #include "main.h"
 #include "Functions.cpp"
 
+
 //------File which we read----------//
 const char* NAME_FILE = "Onegin.txt";
 //----------------------------------//
@@ -15,6 +16,10 @@ const char* NAME_FILE = "Onegin.txt";
 
 int main()
 {
+    printf("\"Onegin\"\n");
+    printf("Line sorting program\n");
+    printf("with text cleaning. \n");
+    printf("Created by Michail Kaskov.\n\n");
     SetConsoleOutputCP(1251);
     SetConsoleCP(1251);
 
@@ -46,92 +51,42 @@ int main()
 
     //-------------------------------------------------//
 
-    unsigned char* buffer = (unsigned char*) calloc(length, sizeof(unsigned char));
-    long read = fread(buffer, sizeof(unsigned char), length, file);
-    if (read == length){
-        printf("Reading - OK\n");
-    } else {
-        printf("ERROR in reading\n");
-        assert(read == length);
-    }
-
+    unsigned char* buffer = Buffering(length, file);
 
     long newlength = ClearingText(buffer, length);
     buffer = (unsigned char*) realloc(buffer, newlength);
 
-//    printf("buffer %c\n", buffer[newlength-7]);
-//    printf("buffer %c\n", buffer[newlength-6]);
-//    printf("buffer %c\n", buffer[newlength-5]);
-//    printf("buffer %c\n", buffer[newlength-4]);
-//    printf("buffer %c\n", buffer[newlength-3]);
-//    printf("buffer %c\n", buffer[newlength-2]);
-//    printf("buffer %c\n", buffer[newlength-1]);
-//    printf("buffer %c\n", buffer[newlength]);
 
     long num_enter = HowEnter(buffer, newlength);
-    if (buffer == NULL){
-        printf("ERROR in realloc()!\n");
-        assert(buffer != NULL);
-    }
+    num_enter++; // because has +1 string
 
     FILE* newfile = fopen("Onegin_clear.txt", "w+");
     fwrite(buffer, sizeof(unsigned char),newlength, newfile);
 
-    num_enter++; // because has +1 string
 
     struct pointer_buffer strings[num_enter];
     FillStruct(strings, buffer, newlength, num_enter);
 
-    //printf("%d \n", strings[0].pointer[strings[0].length-1]);
-
-//    for (int j = 0; j < num_enter - 1; j++){
-////        for (unsigned char* i = strings[j].pointer; i <  (strings[j+1].pointer); i++){
-////            if (*i != 0){
-////                printf("Error,  not '\0' in string - %d", j);
-////            }
-////        }
-//        if (strings[j].pointer[0] == 10){
-//                printf("Error,  not '10' in string - %d\n", j);
-//                assert(strings[j].pointer[0] != 10);
-//            }
-//        //printf("%ld \n", strings[i].length);
-//    }
-
-
-   // printf("\n");
-
-    QuickSort(strings, 0, (num_enter - 1),  Compar);
-//    for (unsigned char* i = strings[0].pointer; i <  (strings[0].pointer + 7); i++){
-//            printf("%d ", *i);
-//        }
     FILE* sortfile = fopen("Onegin_sort.txt", "w+");
 
-    for (int i = 0; i < num_enter; i++){
-        fwrite(strings[i].pointer, sizeof(unsigned char), strings[i].length, sortfile);
-    }
+    QuickSort(strings, 0, (num_enter - 1),  Compar);
+    Writing(sortfile, strings, num_enter);
+
     fputc('\n', sortfile);
+
     QuickSort(strings, 0, (num_enter - 1),  ComparRev);
-    for (int i = 0; i < num_enter; i++){
-        fwrite(strings[i].pointer, sizeof(unsigned char), strings[i].length, sortfile);
-    }
+    Writing(sortfile, strings, num_enter);
 
     buffer[newlength - 1] = '\0';
-
     fputc('\n', sortfile);
-    fwrite(buffer, sizeof(unsigned char), newlength, sortfile);
-//    for (int i = 0; i < num_enter; i++){
-//        printf("%ld \n", strings[i].length);
-//    }
-//    for (unsigned char* i = strings[num_enter-1].pointer; i <  (strings[num_enter-1].pointer+7); i++){
-//        printf("%d ", *i);
-//    }
-    //int arr[6] = {1, 10, 9, 8, 7, 6};
-//    QuickSort(strings, num_enter);
 
-   // printf("num_enter = %ld", num_enter);
+    fwrite(buffer, sizeof(unsigned char), newlength, sortfile);
+    printf("Writing - OK\n");
+    printf("Work is done!");
+    free(buffer);
     fclose(sortfile);
     fclose(newfile);
-    free(buffer);
     fclose(file);
+
     return 0;
 }
