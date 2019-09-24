@@ -84,32 +84,41 @@ int main()
 
     //printf("%d \n", strings[0].pointer[strings[0].length-1]);
 
-    for (int j = 0; j < num_enter - 1; j++){
-//        for (unsigned char* i = strings[j].pointer; i <  (strings[j+1].pointer); i++){
-//            if (*i != 0){
-//                printf("Error,  not '\0' in string - %d", j);
+//    for (int j = 0; j < num_enter - 1; j++){
+////        for (unsigned char* i = strings[j].pointer; i <  (strings[j+1].pointer); i++){
+////            if (*i != 0){
+////                printf("Error,  not '\0' in string - %d", j);
+////            }
+////        }
+//        if (strings[j].pointer[0] == 10){
+//                printf("Error,  not '10' in string - %d\n", j);
+//                assert(strings[j].pointer[0] != 10);
 //            }
+//        //printf("%ld \n", strings[i].length);
+//    }
+
+
+   // printf("\n");
+
+    QuickSort(strings, 0, (num_enter - 1),  Compar);
+//    for (unsigned char* i = strings[0].pointer; i <  (strings[0].pointer + 7); i++){
+//            printf("%d ", *i);
 //        }
-        if (strings[j].pointer[0] == 10){
-                printf("Error,  not '10' in string - %d\n", j);
-                assert(strings[j].pointer[0] != 10);
-            }
-        //printf("%ld \n", strings[i].length);
-    }
-
-
-    printf("\n");
-
-    QuickSort(strings, 0, (num_enter - 1) );
-    for (unsigned char* i = strings[0].pointer; i <  (strings[0].pointer + 7); i++){
-            printf("%d ", *i);
-        }
     FILE* sortfile = fopen("Onegin_sort.txt", "w+");
 
     for (int i = 0; i < num_enter; i++){
         fwrite(strings[i].pointer, sizeof(unsigned char), strings[i].length, sortfile);
     }
+    fputc('\n', sortfile);
+    QuickSort(strings, 0, (num_enter - 1),  ComparRev);
+    for (int i = 0; i < num_enter; i++){
+        fwrite(strings[i].pointer, sizeof(unsigned char), strings[i].length, sortfile);
+    }
 
+    buffer[newlength - 1] = '\0';
+
+    fputc('\n', sortfile);
+    fwrite(buffer, sizeof(unsigned char), newlength, sortfile);
 //    for (int i = 0; i < num_enter; i++){
 //        printf("%ld \n", strings[i].length);
 //    }
@@ -119,7 +128,7 @@ int main()
     //int arr[6] = {1, 10, 9, 8, 7, 6};
 //    QuickSort(strings, num_enter);
 
-    printf("num_enter = %ld", num_enter);
+   // printf("num_enter = %ld", num_enter);
     fclose(sortfile);
     fclose(newfile);
     free(buffer);

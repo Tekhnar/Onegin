@@ -30,18 +30,18 @@ void FillStruct(struct pointer_buffer *strings, unsigned char buffer[], long new
 }
 
 
-void QuickSort(struct pointer_buffer *strings, long left, long right){
+void QuickSort(struct pointer_buffer *strings, long left, long right, int (*cmp)(struct pointer_buffer left, struct pointer_buffer right)){
     assert(strings != 0);
 
     if (left >= right) return;
     Swap(strings, left, (right + left)/2);
     long last = left;
     for (long i = left + 1; i <= right; i++){
-        if (Compar(strings[i] ,strings[left])) Swap(strings, ++last, i);
+        if ((*cmp)(strings[i] ,strings[left])) Swap(strings, ++last, i);
     }
     Swap(strings, left, last);
-    QuickSort(strings, left, last - 1);
-    QuickSort(strings, last + 1, right);
+    QuickSort(strings, left, last - 1, cmp);
+    QuickSort(strings, last + 1, right, cmp);
 
 //    int i, last;
 //    //void swap(int v[], int i, int j);
@@ -121,6 +121,28 @@ int Compar(struct pointer_buffer left, struct pointer_buffer right){
     //else return 0;
 }
 
+int ComparRev(struct pointer_buffer left, struct pointer_buffer right){
+
+    long minim = left.length +1;
+    if (right.length < minim) minim = right.length;
+    //printf("Is right.pointer[j] - %p \n", right.pointer);
+    long j = 0;
+    for (long i = 0; (i < minim) && (j < minim); i++){
+
+        while(IsNotLetter(left.pointer[left.length - i - 1]) && (i < minim)) i++;
+        //printf("Is right.pointer[j] - %c \n", left.pointer[i]);
+        while(IsNotLetter(right.pointer[right.length - j - 1]) && (j < minim)) j++;
+
+//        printf("First char - %c Second char - %c\n", left.pointer[i], *right.pointer[i] );
+        if (ConvertToMyChar(left.pointer[left.length - i - 1]) < ConvertToMyChar(right.pointer[right.length - j - 1])) return 1;
+        if (ConvertToMyChar(left.pointer[left.length - i - 1]) > ConvertToMyChar(right.pointer[right.length - j - 1])) return 0;
+        j++;
+    }
+    if (right.length > minim) return 1;
+
+    return 0;
+    //else return 0;
+}
 void Swap(struct pointer_buffer *strings, long left, long right){
     struct pointer_buffer temp;
    // printf("lenght before %d ", strings[left].pointer);
