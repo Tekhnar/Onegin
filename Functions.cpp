@@ -146,7 +146,7 @@ void Swap(struct pointer_buffer *strings, long left, long right){
     strings[left] = strings[right];
     strings[right] = temp;
 }
-
+/*
 int ConvertToMyChar (unsigned char in){
     int input = in;
     if (input >= 65 && input <= 90) {
@@ -164,6 +164,30 @@ int ConvertToMyChar (unsigned char in){
 
     return input;
 }
+*/
+int ConvertToMyChar (unsigned char in){
+    int input = in;
+    if (input >= 'A' && input <= 'Z') {
+        input += 32;
+    }
+    else if ((input >= 'À' && input <= 'Å')) { // Russian char start from 300
+        input += 108;
+    }
+    else if (input >= 'a' && input <= 'e'){
+        input += 76;
+    }
+    else if (input == '¨' || input == '¸') {
+        input = 306;
+    }
+    else if (input >= 'Æ' && input <= 'ß'){
+        input += 109;
+    }
+    else if (input >= 'æ' && input <= 'ÿ'){
+        input += 77;
+    }
+
+    return input;
+}
 
 int IsNotLetter(unsigned char input){
     //assert(input == 177);
@@ -177,3 +201,17 @@ int IsNotLetter(unsigned char input){
         return 0;
         else return 1;
 }
+
+/*
+int IsNotLetter(unsigned char input){
+    //assert(input == 177);
+    if (   (input >= 'A' && input <= 'Z')
+        || (input >= 'a' && input <= 'z')
+        || (input >= 'À' && input <= 'ß')
+        || (input >= 'à' && input <= 'ÿ')
+
+        || (input == '¸' || input == '¨'))
+        return 0;
+        else return 1;
+}
+*/

@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1569357877 source:d:\code\onegin\main.cpp
+1569405755 source:d:\code\onegin\main.cpp
 	<stdio.h>
 	<stdlib.h>
 	<assert.h>
@@ -13,5 +13,5 @@
 
 1569358363 d:\code\onegin\main.h
 
-1569358363 d:\code\onegin\functions.cpp
+1569407299 d:\code\onegin\functions.cpp
 

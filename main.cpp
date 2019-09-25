@@ -26,7 +26,7 @@ int main()
 
     struct stat buff_stat; //kill!
     if (stat (NAME_FILE, &buff_stat)){
-        printf("Don't found file!\n");
+        printf("Don't found file \"Onegin\" with text!\n");
         assert(stat(NAME_FILE, &buff_stat));
     }
 
