@@ -10,12 +10,13 @@
 
 
 //------File which we read----------//
-const char* NAME_FILE = "Onegin.txt";
+//const char* NAME_FILE = "Onegin.txt";
 //----------------------------------//
 
 
-int main()
+int main(int num_arg, char *poin_arg[])
 {
+    printf("%s\n", poin_arg[2]);
     printf("\"Onegin\"\n");
     printf("Line sorting program\n");
     printf("with text cleaning. \n");
@@ -23,11 +24,14 @@ int main()
     SetConsoleOutputCP(1251);
     SetConsoleCP(1251);
 
+    long num_symb_name_file = 0;
+    char *name_file = SearchText(num_arg, poin_arg, &num_symb_name_file);
 
-    struct stat buff_stat; //kill!
-    if (stat (NAME_FILE, &buff_stat)){
-        printf("Don't found file \"Onegin\" with text!\n");
-        assert(stat(NAME_FILE, &buff_stat));
+
+    struct stat buff_stat = {};
+    if (stat (name_file, &buff_stat)){
+        printf("Don't found file with text!\n");
+        assert(stat(name_file, &buff_stat));
     }
 
     long length = buff_stat.st_size;
@@ -38,34 +42,40 @@ int main()
     //----------------------------------------------------//
 
 
-    FILE* file = fopen(NAME_FILE, "rb");
+    FILE* file = fopen(name_file, "rb");
     if (file == NULL) {
         printf("Can't open or found file!\n");
         assert(file != NULL);
     }
 
+    FILE* clearfile = fopen("Onegin_clear.txt", "w+");
+
     //-------------------------------------------------//
     // If the length is longer, then we will use ftell()
 
-    // long length = IsLength(file);
+    // long length = ItLength(file);
 
     //-------------------------------------------------//
-
-    unsigned char* buffer = Buffering(length, file);
-
-    long newlength = ClearingText(buffer, length);
-    buffer = (unsigned char*) realloc(buffer, newlength);
+    long newlength = 0;
+    long num_enter = 0;
+    unsigned char* buffer = WordProcessing(length, &newlength, &num_enter, file, clearfile);
 
 
-    long num_enter = HowEnter(buffer, newlength);
-    num_enter++; // because has +1 string
-
-    FILE* newfile = fopen("Onegin_clear.txt", "w+");
-    fwrite(buffer, sizeof(unsigned char),newlength, newfile);
-
-
+//    unsigned char* buffer = Buffering(length, file);
+//
+//    long newlength = ClearingText(buffer, length);
+//    buffer = (unsigned char*) realloc(buffer, newlength);
+//
+//
+//    long num_enter = HowEnter(buffer, newlength);
+//    num_enter++; // because has +1 string
+//
+//    fwrite(buffer, sizeof(unsigned char),newlength, clearfile);
+//
+//
     struct pointer_buffer strings[num_enter];
     FillStruct(strings, buffer, newlength, num_enter);
+
 
     FILE* sortfile = fopen("Onegin_sort.txt", "w+");
 
@@ -81,12 +91,13 @@ int main()
     fputc('\n', sortfile);
 
     fwrite(buffer, sizeof(unsigned char), newlength, sortfile);
-    printf("Writing - OK\n");
+    if (logs == 1) printf("Writing - OK\n");
     printf("Work is done!");
     free(buffer);
     fclose(sortfile);
-    fclose(newfile);
+    fclose(clearfile);
     fclose(file);
+    getchar();
 
     return 0;
 }

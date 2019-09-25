@@ -1,3 +1,34 @@
+unsigned char* WordProcessing(long length, long* newlength, long* num_enter, FILE* file, FILE* clearfile){
+    unsigned char* buffer = Buffering(length, file);
+
+    *newlength = ClearingText(buffer, length);
+    buffer = (unsigned char*) realloc(buffer, *newlength);
+
+
+    *num_enter = HowEnter(buffer, *newlength);
+    (*num_enter)++; // because has +1 string
+
+    fwrite(buffer, sizeof(unsigned char), *newlength, clearfile);
+
+    return buffer;
+}
+char* SearchText(int num_arg, char *poin_arg[], long* num_symb_name_file){
+    char* string_name = 0;
+    for (int j = 1; j < num_arg; j++){
+        int length_arg = strchr(poin_arg[j], '\0') - poin_arg[j];
+
+        if (poin_arg[j][0] >= 'A' && poin_arg[j][0] <='Z' && poin_arg[j][1]==':') {
+            string_name = poin_arg[j];
+            *num_symb_name_file = length_arg;
+        }
+
+        for (int i = 0; poin_arg[j][i] != '\0'; i++){
+            if ((i + 2 < length_arg) && (poin_arg[j][i] == '-') && (poin_arg[j][i + 1] == '-'))
+                logs = 1;
+        }
+    }
+    return string_name;
+}
 unsigned char* Buffering(long length, FILE* file){
     unsigned char* point = (unsigned char*) calloc(length, sizeof(unsigned char));
     if (point == NULL){
@@ -7,7 +38,7 @@ unsigned char* Buffering(long length, FILE* file){
 
     long read = fread(point, sizeof(unsigned char), length, file);
     if (read == length){
-        printf("Reading - OK\n");
+        if (logs == 1) printf("Reading - OK\n");
     } else {
         printf("ERROR in reading\n");
         assert(read == length);
@@ -18,6 +49,7 @@ unsigned char* Buffering(long length, FILE* file){
 
 void Writing(FILE* sortfile, struct pointer_buffer *strings, long num_enter){
     assert(sortfile != NULL);
+    assert(strings != NULL);
 
     for (int i = 0; i < num_enter; i++){
         long write = fwrite(strings[i].pointer, sizeof(unsigned char), strings[i].length, sortfile);
@@ -28,7 +60,7 @@ void Writing(FILE* sortfile, struct pointer_buffer *strings, long num_enter){
     }
 }
 
-long IsLength(FILE* file){
+long ItLength(FILE* file){
     assert(file != NULL);
 
     fseek(file, 0, SEEK_END);
@@ -73,7 +105,7 @@ void FillStruct(struct pointer_buffer *strings, unsigned char buffer[], long new
     }
 }
 
-void QuickSort(struct pointer_buffer *strings, long left, long right, int (*cmp)(struct pointer_buffer left, struct pointer_buffer right)){
+void QuickSort(struct pointer_buffer *strings, long left, long right, int (*cmp)(void *first, void *second)){
     assert(strings != NULL);
     assert(cmp != NULL);
     assert(left >= 0);
@@ -83,7 +115,7 @@ void QuickSort(struct pointer_buffer *strings, long left, long right, int (*cmp)
 
     long last = left;
     for (long i = left + 1; i <= right; i++){
-        if ((*cmp)(strings[i] ,strings[left])) Swap(strings, ++last, i);
+        if ((*cmp)(&strings[i] , &strings[left])) Swap(strings, ++last, i);
     }
 
     Swap(strings, left, last);
@@ -92,45 +124,51 @@ void QuickSort(struct pointer_buffer *strings, long left, long right, int (*cmp)
 
 
 }
+int Compar(void* first, void* second){
+//int Compar(struct pointer_buffer *left, struct pointer_buffer *right){
+    struct pointer_buffer *left  = (struct pointer_buffer*)first;
+    struct pointer_buffer *right = (struct pointer_buffer*)second;
 
-int Compar(struct pointer_buffer left, struct pointer_buffer right){
-    assert(left.pointer != NULL);
-    assert(right.pointer != NULL);
+    assert((*left).pointer != NULL);
+    assert((*right).pointer != NULL);
 
-    long minim = left.length +1;
-    if (right.length < minim) minim = right.length;
+    long minim = (*left).length + 1;
+    if ((*right).length < minim) minim = (*right).length;
 
     long j = 0;
     for (long i = 0; (i < minim) && (j < minim); i++){
-        while(IsNotLetter(left.pointer[i]) && (i < minim)) i++;
-        while(IsNotLetter(right.pointer[j]) && (j < minim)) j++;
+        while(IsNotLetter((*left).pointer[i] ) && (i < minim)) i++;
+        while(IsNotLetter((*right).pointer[j]) && (j < minim)) j++;
 
-        if (ConvertToMyChar(left.pointer[i]) < ConvertToMyChar(right.pointer[j])) return 1;
-        if (ConvertToMyChar(left.pointer[i]) > ConvertToMyChar(right.pointer[j])) return 0;
+        if (ConvertToMyChar((*left).pointer[i]) < ConvertToMyChar((*right).pointer[j])) return 1;
+        if (ConvertToMyChar((*left).pointer[i]) > ConvertToMyChar((*right).pointer[j])) return 0;
         j++;
     }
-    if (right.length > minim) return 1;
+    if ((*right).length > minim) return 1;
 
     return 0;
 }
 
-int ComparRev(struct pointer_buffer left, struct pointer_buffer right){
-    assert(left.pointer != NULL);
-    assert(right.pointer != NULL);
+int ComparRev(void *first, void *second){
+    struct pointer_buffer *left = (struct pointer_buffer*)first;
+    struct pointer_buffer *right = (struct pointer_buffer*)second;
 
-    long minim = left.length +1;
-    if (right.length < minim) minim = right.length;
+    assert((*left).pointer != NULL);
+    assert((*right).pointer != NULL);
+
+    long minim = (*left).length + 1;
+    if ((*right).length < minim) minim = (*right).length;
 
     long j = 0;
     for (long i = 0; (i < minim) && (j < minim); i++){
-        while(IsNotLetter(left.pointer[left.length - i - 1]) && (i < minim)) i++;
-        while(IsNotLetter(right.pointer[right.length - j - 1]) && (j < minim)) j++;
+        while(IsNotLetter((*left).pointer[(*left).length - i - 1]) && (i < minim)) i++;
+        while(IsNotLetter((*right).pointer[(*right).length - j - 1]) && (j < minim)) j++;
 
-        if (ConvertToMyChar(left.pointer[left.length - i - 1]) < ConvertToMyChar(right.pointer[right.length - j - 1])) return 1;
-        if (ConvertToMyChar(left.pointer[left.length - i - 1]) > ConvertToMyChar(right.pointer[right.length - j - 1])) return 0;
+        if (ConvertToMyChar((*left).pointer[(*left).length - i - 1]) < ConvertToMyChar((*right).pointer[(*right).length - j - 1])) return 1;
+        if (ConvertToMyChar((*left).pointer[(*left).length - i - 1]) > ConvertToMyChar((*right).pointer[(*right).length - j - 1])) return 0;
         j++;
     }
-    if (right.length > minim) return 1;
+    if ((*right).length > minim) return 1;
 
     return 0;
 }
@@ -140,9 +178,7 @@ void Swap(struct pointer_buffer *strings, long left, long right){
     assert(left >= 0);
     assert(right >= 0);
 
-    struct pointer_buffer temp;
-
-    temp = strings[left];
+    struct pointer_buffer temp = strings[left];
     strings[left] = strings[right];
     strings[right] = temp;
 }
@@ -165,21 +201,25 @@ int ConvertToMyChar (unsigned char in){
     return input;
 }
 */
+
+
 int ConvertToMyChar (unsigned char in){
+    // Using number, not char symbol, because
+    // compiler can false understand encoding of char
     int input = in;
-    if (input >= 'A' && input <= 'Z') {
+    if (input >= 65 && input <= 90) {
         input += 32;
     }
-    else if ((input >= 'À' && input <= 'Å')) { // Russian char start from 300
+    else if (input >= 192 /*rus 'A'*/ && input <= 197 /*rus 'Å'*/){
         input += 108;
     }
-    else if (input >= 'a' && input <= 'e'){
+    else if (input >= 224 /*rus 'à'*/ && input <= 229 /*rus 'å'*/){
         input += 76;
     }
-    else if (input == '¨' || input == '¸') {
+    else if (input == 168 /*rus '¨'*/ || input == 184 /*rus '¸'*/){
         input = 306;
     }
-    else if (input >= 'Æ' && input <= 'ß'){
+    else if (input >= 198 /*rus 'Æ'*/ && input <= 223 /*rus 'ß'*/){
         input += 109;
     }
     else if (input >= 'æ' && input <= 'ÿ'){
@@ -190,7 +230,6 @@ int ConvertToMyChar (unsigned char in){
 }
 
 int IsNotLetter(unsigned char input){
-    //assert(input == 177);
     if (   (input >= 65 && input <= 90)
         || (input >= 192 && input <= 197)
         || (input >= 224 && input <= 229)
