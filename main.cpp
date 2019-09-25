@@ -9,14 +9,10 @@
 #include "Functions.cpp"
 
 
-//------File which we read----------//
-//const char* NAME_FILE = "Onegin.txt";
-//----------------------------------//
-
 
 int main(int num_arg, char *poin_arg[])
 {
-    printf("%s\n", poin_arg[2]);
+    printf("%s\n", poin_arg[1]);
     printf("\"Onegin\"\n");
     printf("Line sorting program\n");
     printf("with text cleaning. \n");
@@ -48,51 +44,40 @@ int main(int num_arg, char *poin_arg[])
         assert(file != NULL);
     }
 
-    FILE* clearfile = fopen("Onegin_clear.txt", "w+");
-
     //-------------------------------------------------//
     // If the length is longer, then we will use ftell()
 
     // long length = ItLength(file);
 
     //-------------------------------------------------//
+
+    FILE* clearfile = fopen("Onegin_clear.txt", "w+");
     long newlength = 0;
     long num_enter = 0;
     unsigned char* buffer = WordProcessing(length, &newlength, &num_enter, file, clearfile);
 
-
-//    unsigned char* buffer = Buffering(length, file);
-//
-//    long newlength = ClearingText(buffer, length);
-//    buffer = (unsigned char*) realloc(buffer, newlength);
-//
-//
-//    long num_enter = HowEnter(buffer, newlength);
-//    num_enter++; // because has +1 string
-//
-//    fwrite(buffer, sizeof(unsigned char),newlength, clearfile);
-//
-//
     struct pointer_buffer strings[num_enter];
     FillStruct(strings, buffer, newlength, num_enter);
 
 
     FILE* sortfile = fopen("Onegin_sort.txt", "w+");
 
+
     QuickSort(strings, 0, (num_enter - 1),  Compar);
     Writing(sortfile, strings, num_enter);
-
     fputc('\n', sortfile);
 
     QuickSort(strings, 0, (num_enter - 1),  ComparRev);
     Writing(sortfile, strings, num_enter);
-
     buffer[newlength - 1] = '\0';
     fputc('\n', sortfile);
 
+
     fwrite(buffer, sizeof(unsigned char), newlength, sortfile);
+
     if (logs == 1) printf("Writing - OK\n");
     printf("Work is done!");
+
     free(buffer);
     fclose(sortfile);
     fclose(clearfile);

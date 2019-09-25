@@ -23,7 +23,8 @@ char* SearchText(int num_arg, char *poin_arg[], long* num_symb_name_file){
         }
 
         for (int i = 0; poin_arg[j][i] != '\0'; i++){
-            if ((i + 2 < length_arg) && (poin_arg[j][i] == '-') && (poin_arg[j][i + 1] == '-'))
+
+            if ((i + 2 < length_arg) && (poin_arg[j][i] == '-') && (poin_arg[j][i + 1] == '-') && (poin_arg[j][i + 2] == 'v'))
                 logs = 1;
         }
     }
@@ -125,7 +126,6 @@ void QuickSort(struct pointer_buffer *strings, long left, long right, int (*cmp)
 
 }
 int Compar(void* first, void* second){
-//int Compar(struct pointer_buffer *left, struct pointer_buffer *right){
     struct pointer_buffer *left  = (struct pointer_buffer*)first;
     struct pointer_buffer *right = (struct pointer_buffer*)second;
 
@@ -182,25 +182,6 @@ void Swap(struct pointer_buffer *strings, long left, long right){
     strings[left] = strings[right];
     strings[right] = temp;
 }
-/*
-int ConvertToMyChar (unsigned char in){
-    int input = in;
-    if (input >= 65 && input <= 90) {
-        input += 32;
-    }
-    else if ((input >= 192 && input <= 197) || (input >= 224 && input <= 229)) { // Russian char start from 300
-        input += 108;
-    }
-    else if (input == 168 || input == 184) {
-        input = 306;
-    }
-    else if ((input >= 198 && input <= 223) || (input >= 230 && input <= 255)){
-        input += 109;
-    }
-
-    return input;
-}
-*/
 
 
 int ConvertToMyChar (unsigned char in){
