@@ -1,23 +1,41 @@
-unsigned char* WordProcessing(long length, long* newlength, long* num_enter, FILE* file, FILE* clearfile){
+unsigned char* WordProcessing(long* newlength, long* num_enter, FILE* file, struct pointer_buffer** strings){
+    assert(newlength > 0);
+    assert(num_enter > 0);
+    assert(file != 0);
+
+    long length = ItLength(file);
+
+    FILE* clearfile = fopen("Onegin_clear.txt", "w+");
+
     unsigned char* buffer = Buffering(length, file);
 
     *newlength = ClearingText(buffer, length);
     buffer = (unsigned char*) realloc(buffer, *newlength);
-
 
     *num_enter = HowEnter(buffer, *newlength);
     (*num_enter)++; // because has +1 string
 
     fwrite(buffer, sizeof(unsigned char), *newlength, clearfile);
 
+    fclose(clearfile);
+
+    *strings = (struct pointer_buffer*) calloc(*num_enter, sizeof(pointer_buffer));
+    //printf("%p\n", strings);
+    FillStruct(*strings, buffer, *newlength, *num_enter);
+
     return buffer;
 }
+
 char* SearchText(int num_arg, char *poin_arg[], long* num_symb_name_file){
+    assert(num_arg > 0);
+    assert(poin_arg != 0);
+    assert(num_symb_name_file != 0);
+
     char* string_name = 0;
     for (int j = 1; j < num_arg; j++){
         int length_arg = strchr(poin_arg[j], '\0') - poin_arg[j];
 
-        if (poin_arg[j][0] >= 'A' && poin_arg[j][0] <='Z' && poin_arg[j][1]==':') {
+        if (poin_arg[j][0] >= 'A' && poin_arg[j][0] <= 'Z' && poin_arg[j][1] == ':') {
             string_name = poin_arg[j];
             *num_symb_name_file = length_arg;
         }
@@ -25,12 +43,16 @@ char* SearchText(int num_arg, char *poin_arg[], long* num_symb_name_file){
         for (int i = 0; poin_arg[j][i] != '\0'; i++){
 
             if ((i + 2 < length_arg) && (poin_arg[j][i] == '-') && (poin_arg[j][i + 1] == '-') && (poin_arg[j][i + 2] == 'v'))
-                logs = 1;
+                Logs = 1;
         }
     }
     return string_name;
 }
+
 unsigned char* Buffering(long length, FILE* file){
+    assert(length > 0);
+    assert(file != 0);
+
     unsigned char* point = (unsigned char*) calloc(length, sizeof(unsigned char));
     if (point == NULL){
         printf("ERROR in realloc()!\n");
@@ -39,7 +61,7 @@ unsigned char* Buffering(long length, FILE* file){
 
     long read = fread(point, sizeof(unsigned char), length, file);
     if (read == length){
-        if (logs == 1) printf("Reading - OK\n");
+        if (Logs == 1) printf("Reading - OK\n");
     } else {
         printf("ERROR in reading\n");
         assert(read == length);
@@ -50,7 +72,7 @@ unsigned char* Buffering(long length, FILE* file){
 
 void Writing(FILE* sortfile, struct pointer_buffer *strings, long num_enter){
     assert(sortfile != NULL);
-    assert(strings != NULL);
+    assert(strings  != NULL);
 
     for (int i = 0; i < num_enter; i++){
         long write = fwrite(strings[i].pointer, sizeof(unsigned char), strings[i].length, sortfile);
@@ -184,54 +206,34 @@ void Swap(struct pointer_buffer *strings, long left, long right){
 }
 
 
-int ConvertToMyChar (unsigned char in){
+int ConvertToMyChar(unsigned char in){
+    //-------------------------------------//
     // Using number, not char symbol, because
     // compiler can false understand encoding of char
+    //-------------------------------------//
+
     int input = in;
-    if (input >= 65 && input <= 90) {
-        input += 32;
-    }
-    else if (input >= 192 /*rus 'A'*/ && input <= 197 /*rus 'Å'*/){
-        input += 108;
-    }
-    else if (input >= 224 /*rus 'à'*/ && input <= 229 /*rus 'å'*/){
-        input += 76;
-    }
-    else if (input == 168 /*rus '¨'*/ || input == 184 /*rus '¸'*/){
-        input = 306;
-    }
-    else if (input >= 198 /*rus 'Æ'*/ && input <= 223 /*rus 'ß'*/){
-        input += 109;
-    }
-    else if (input >= 'æ' && input <= 'ÿ'){
-        input += 77;
-    }
+    if      (input >= 65 /*eng 'A'*/  && input <= 90 /*eng 'Z'*/)  input += 32;
+    else if (input >= 192 /*rus 'A'*/ && input <= 197 /*rus 'Ã…'*/) input += 108;
+    else if (input >= 224 /*rus 'Ã '*/ && input <= 229 /*rus 'Ã¥'*/) input += 76;
+    else if (input == 168 /*rus 'Â¨'*/ || input == 184 /*rus 'Â¸'*/) input = 306;
+    else if (input >= 198 /*rus 'Ã†'*/ && input <= 223 /*rus 'ÃŸ'*/) input += 109;
+    else if (input >= 230 /*rus 'Ð¶'*/ && input <= 255 /*rus 'Ñ'*/) input += 77;
 
     return input;
 }
 
 int IsNotLetter(unsigned char input){
-    if (   (input >= 65 && input <= 90)
-        || (input >= 192 && input <= 197)
-        || (input >= 224 && input <= 229)
+    //-------------------------------------//
+    // Using number, not char symbol, because
+    // compiler can false understand encoding of char
+    //-------------------------------------//
 
-        || (input == 168 || input == 184)
-        || (input >= 198 && input <= 223)
-        || (input >= 230 && input <= 255))
+    if  ((input >= 65  && input <= 90)  /*eng 'A' - eng 'Z'*/
+        || (input >= 97  && input <= 122) /*eng 'a' - eng 'z'*/
+        || (input >= 192 && input <= 255) /*rus 'Ð' - rus 'Ñ'*/
+        || (input == 168 || input == 184)) /*rus 'Ð' & rus 'Ñ‘'*/
         return 0;
-        else return 1;
+    else return 1;
 }
 
-/*
-int IsNotLetter(unsigned char input){
-    //assert(input == 177);
-    if (   (input >= 'A' && input <= 'Z')
-        || (input >= 'a' && input <= 'z')
-        || (input >= 'À' && input <= 'ß')
-        || (input >= 'à' && input <= 'ÿ')
-
-        || (input == '¸' || input == '¨'))
-        return 0;
-        else return 1;
-}
-*/
