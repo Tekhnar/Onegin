@@ -20,6 +20,10 @@ void Swap(struct pointer_buffer *strings, long left, long right);
 int ConvertToMyChar (unsigned char in);
 int IsNotLetter(unsigned char input);
 
+unsigned char* ConvertText(unsigned char* buffer, long length, long* newlength);
+unsigned char* ConvertFromUTF16LE(unsigned char* buffer, long length, long* newlength);
+
+
 struct pointer_buffer {
     unsigned char* pointer;
     long length;

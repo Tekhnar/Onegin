@@ -9,23 +9,70 @@ unsigned char* WordProcessing(long* newlength, long* num_enter, FILE* file, stru
 
     unsigned char* buffer = Buffering(length, file);
 
-    *newlength = ClearingText(buffer, length);
-    buffer = (unsigned char*) realloc(buffer, *newlength);
+    unsigned char* data = ConvertText(buffer, length, newlength);
+
+    *newlength = ClearingText(data, length);
+    data = (unsigned char*) realloc(data, *newlength);
+
 
     *num_enter = HowEnter(buffer, *newlength);
     (*num_enter)++; // because has +1 string
 
-    fwrite(buffer, sizeof(unsigned char), *newlength, clearfile);
+    fwrite(data, sizeof(unsigned char), *newlength, clearfile);
 
     fclose(clearfile);
 
     *strings = (struct pointer_buffer*) calloc(*num_enter, sizeof(pointer_buffer));
     //printf("%p\n", strings);
-    FillStruct(*strings, buffer, *newlength, *num_enter);
+    FillStruct(*strings, data, *newlength, *num_enter);
 
+    return data;
+}
+
+unsigned char* ConvertText(unsigned char* buffer, long length, long* newlength){
+    printf("unicode %x \n", *(unsigned short*)buffer);
+
+    if (*(unsigned short*)buffer == 0xFEFF) {
+        return ConvertFromUTF16LE(buffer, length, newlength);
+    }
     return buffer;
 }
 
+unsigned char* ConvertFromUTF16LE(unsigned char* buffer, long length, long* newlength){
+    unsigned char* data = (unsigned char*) calloc(length, sizeof(char));
+    for (int i = 2; i < length; i += 2){
+        unsigned short temp = (buffer[i + 1] << 8) + buffer[i];
+        //unsigned short temp = ((unsigned short*)buffer)[i];
+
+        //printf("TEmp utf-16 LE: %d", temp);
+        //printf("%d ", temp);
+
+        if (temp >= 1040 && temp <= 1103){
+            data[(i - 2) / 2] = temp - 848;
+        }
+
+        if (temp == 1025){
+            data[(i - 2) / 2] = temp - 857;
+        }
+
+        if (temp == 1105){
+            data[(i - 2) / 2] = temp - 921;
+        }
+
+        if (temp >= 0 && temp <= 127){
+            data[(i - 2) / 2] = temp;
+        }
+        //printf("%d ", data[(i - 2) / 2]);
+        //break;
+    }
+
+    *newlength = (length - 2) / 2;
+    data[*newlength] = '\0';
+
+    //data = (unsigned char*) realloc(data, *newlength);
+
+    return data;
+}
 char* SearchText(int num_arg, char *poin_arg[], long* num_symb_name_file){
     assert(num_arg > 0);
     assert(poin_arg != 0);

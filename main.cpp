@@ -4,8 +4,8 @@
 #include <windows.h>
 #include <sys\stat.h>
 
-#include "ClearingText.cpp"
 #include "main.h"
+#include "ClearingText.cpp"
 #include "Functions.cpp"
 
 
