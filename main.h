@@ -9,7 +9,7 @@ char* SearchText(int num_arg, char *poin_arg[], long* num_symb_name_file);
 unsigned char* WordProcessing(long* newlength, long* num_enter, FILE* file, struct pointer_buffer** strings);
 
 long ItLength(FILE* file);
-long HowEnter(unsigned char* buffer, long newlength);
+long WhatEnter(unsigned char* buffer, long newlength);
 void FillStruct(struct pointer_buffer *strings, unsigned char *buffer, long newlength, long num_enter);
 
 void QuickSort(struct pointer_buffer *strings, long left, long right, int (*cmp)(void* first, void* second));
@@ -22,7 +22,7 @@ int IsNotLetter(unsigned char input);
 
 unsigned char* ConvertText(unsigned char* buffer, long length, long* newlength);
 unsigned char* ConvertFromUTF16LE(unsigned char* buffer, long length, long* newlength);
-
+void WritingText(FILE* sortfile,unsigned char* buffer, long num_enter);
 
 struct pointer_buffer {
     unsigned char* pointer;
@@ -30,5 +30,8 @@ struct pointer_buffer {
 };
 
 bool Logs = 0;
+bool
+    IS_UTF_16 = 0,
+    IS_UTF_8 = 0;
 
 #endif // MAIN_H_INCLUDED

@@ -11,14 +11,18 @@ unsigned char* WordProcessing(long* newlength, long* num_enter, FILE* file, stru
 
     unsigned char* data = ConvertText(buffer, length, newlength);
 
+
     *newlength = ClearingText(data, length);
+    if (IS_UTF_16) *newlength = ClearingText(data, *newlength - 1);
+
+    //*newlength = (length - 2) / 2;
     data = (unsigned char*) realloc(data, *newlength);
 
 
-    *num_enter = HowEnter(buffer, *newlength);
+    *num_enter = WhatEnter(data, *newlength);
     (*num_enter)++; // because has +1 string
 
-    fwrite(data, sizeof(unsigned char), *newlength, clearfile);
+    fwrite(data, sizeof(unsigned char), *newlength - 1, clearfile);
 
     fclose(clearfile);
 
@@ -30,9 +34,10 @@ unsigned char* WordProcessing(long* newlength, long* num_enter, FILE* file, stru
 }
 
 unsigned char* ConvertText(unsigned char* buffer, long length, long* newlength){
-    printf("unicode %x \n", *(unsigned short*)buffer);
+    //printf("unicode %x \n", *(unsigned short*)buffer);
 
     if (*(unsigned short*)buffer == 0xFEFF) {
+        IS_UTF_16 = true;
         return ConvertFromUTF16LE(buffer, length, newlength);
     }
     return buffer;
@@ -47,19 +52,19 @@ unsigned char* ConvertFromUTF16LE(unsigned char* buffer, long length, long* newl
         //printf("TEmp utf-16 LE: %d", temp);
         //printf("%d ", temp);
 
-        if (temp >= 1040 && temp <= 1103){
+        if (temp >= 1040 /* А */ && temp <= 1103 /* я */){
             data[(i - 2) / 2] = temp - 848;
         }
 
-        if (temp == 1025){
+        if (temp == 1025 /* Ё */){
             data[(i - 2) / 2] = temp - 857;
         }
 
-        if (temp == 1105){
+        if (temp == 1105 /* ё */){
             data[(i - 2) / 2] = temp - 921;
         }
 
-        if (temp >= 0 && temp <= 127){
+        if (temp >= 0 && temp <= 127 /* ascii code */){
             data[(i - 2) / 2] = temp;
         }
         //printf("%d ", data[(i - 2) / 2]);
@@ -69,10 +74,11 @@ unsigned char* ConvertFromUTF16LE(unsigned char* buffer, long length, long* newl
     *newlength = (length - 2) / 2;
     data[*newlength] = '\0';
 
-    //data = (unsigned char*) realloc(data, *newlength);
+    //data = (unsigned char*) realloc(data, (length - 2) / 2);
 
     return data;
 }
+
 char* SearchText(int num_arg, char *poin_arg[], long* num_symb_name_file){
     assert(num_arg > 0);
     assert(poin_arg != 0);
@@ -121,13 +127,105 @@ void Writing(FILE* sortfile, struct pointer_buffer *strings, long num_enter){
     assert(sortfile != NULL);
     assert(strings  != NULL);
 
+    if (IS_UTF_16){
+        fputc(0xFF, sortfile);
+        fputc(0xFE, sortfile);
+    }
     for (int i = 0; i < num_enter; i++){
-        long write = fwrite(strings[i].pointer, sizeof(unsigned char), strings[i].length, sortfile);
-        if (write != strings[i].length){
-            printf("ERROR in writing in file!\n");
-            assert(write == strings[i].length);
+        if (IS_UTF_16){
+            unsigned short temp_buffer[strings[i].length * 2] = {};
+
+            for (int j = 0; j < strings[i].length; j++){
+
+                unsigned short temp = strings[i].pointer[j];
+
+                if (temp >= 192 /* А */ && temp <= 255 /* я */){
+                    temp += 848;
+                }
+
+                if (temp == 168 /* Ё */){
+                    temp += 857;
+                }
+
+                if (temp == 184 /* ё */){
+                    temp += 921;
+                }
+
+                if (temp >= 0 && temp <= 127 /* ascii code */){
+                    /* nothing */
+                }
+                //temp = 10;
+//                unsigned short temp_swap = temp & 0xFF;
+//                temp = (temp >> 8) + (temp_swap << 8);
+//                if (temp == 10) {
+//                    temp_buffer[j] = 13;
+//                    j++;
+//                }
+                temp_buffer[j] = temp;
+            }
+
+            long write = fwrite(temp_buffer, sizeof(unsigned short), strings[i].length, sortfile);
+            if (write != strings[i].length){
+                printf("ERROR in writing in file!\n");
+                assert(write == strings[i].length);
+            }
+            //abort();
+
+        } else {
+
+            long write = fwrite(strings[i].pointer, sizeof(unsigned char), strings[i].length, sortfile);
+            if (write != strings[i].length){
+                printf("ERROR in writing in file!\n");
+                assert(write == strings[i].length);
+            }
+
         }
     }
+}
+
+void WritingText(FILE* sortfile,unsigned char* buffer,long num_enter, long newlength){
+    assert(sortfile != NULL);
+    assert(buffer  != NULL);
+
+    if (IS_UTF_16){
+        unsigned short* data = (unsigned short*) calloc(sizeof(char), newlength * 2);
+        for (int i = 0; i < newlength; i++){
+
+                unsigned short temp = buffer[i];
+//                printf("%d", temp);
+//                abort();
+
+                if (temp >= 192 /* А */ && temp <= 255 /* я */){
+                    temp += 848;
+                }
+
+                if (temp == 168 /* Ё */){
+                    temp += 857;
+                }
+
+                if (temp == 184 /* ё */){
+                    temp += 921;
+                }
+
+                if (temp >= 0 && temp <= 127 /* ascii code */){
+                    /* nothing */
+                }
+//                printf("%d", temp);
+//                abort();
+
+                //temp = 10;
+//                unsigned short temp_swap = temp & 0xFF;
+//                temp = (temp >> 8) + (temp_swap << 8);
+//                if (temp == 10) {
+//                    temp_buffer[j] = 13;
+//                    j++;
+//                }
+                data[i] = temp;
+            }
+            fwrite(data, sizeof(short), newlength, sortfile);
+            free(data);
+    }
+    else fwrite(buffer, sizeof(unsigned char), newlength, sortfile);
 }
 
 long ItLength(FILE* file){
@@ -140,7 +238,7 @@ long ItLength(FILE* file){
     return result;
 }
 
-long HowEnter(unsigned char* buffer, long newlength){
+long WhatEnter(unsigned char* buffer, long newlength){
     assert(buffer != NULL);
     assert(newlength > 0);
 

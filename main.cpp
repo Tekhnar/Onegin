@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <windows.h>
+//#include <windows.h>
+#include <string.h>
 #include <sys\stat.h>
 
 #include "main.h"
@@ -17,8 +18,8 @@ int main(int num_arg, char *poin_arg[])
     printf("Line sorting program\n");
     printf("with text cleaning. \n");
     printf("Created by Michail Kaskov.\n\n");
-    SetConsoleOutputCP(1251);
-    SetConsoleCP(1251);
+//    SetConsoleOutputCP(1251);
+//    SetConsoleCP(1251);
 
     long num_symb_name_file = 0;
     char *name_file = SearchText(num_arg, poin_arg, &num_symb_name_file);
@@ -44,7 +45,7 @@ int main(int num_arg, char *poin_arg[])
         assert(file != NULL);
     }
 
-    FILE* sortfile  = fopen("Onegin_sort.txt" , "w+");
+    FILE* sortfile  = fopen("Onegin_sort.txt" , "wb+");
 
     //-------------------------------------------------//
     // If the length is longer, then we will use ftell()
@@ -59,22 +60,27 @@ int main(int num_arg, char *poin_arg[])
     QuickSort(strings, 0, (num_enter - 1),  Compar);
     Writing(sortfile, strings, num_enter);
     fputc('\n', sortfile);
+    fputc('\0', sortfile);
+
 
     QuickSort(strings, 0, (num_enter - 1),  ComparRev);
     Writing(sortfile, strings, num_enter);
     buffer[newlength - 1] = '\0';
     fputc('\n', sortfile);
+    fputc('\0', sortfile);
 
-    fwrite(buffer, sizeof(unsigned char), newlength, sortfile);
+    WritingText(sortfile, buffer, num_enter, newlength);
+    //fwrite(buffer, sizeof(unsigned char), newlength, sortfile);
 
     if (Logs == 1) printf("Writing - OK\n\n");
-    printf("The work is done!");
+    printf("The work is done!\n");
 
     free(strings);
     free(buffer);
     fclose(sortfile);
     fclose(file);
-    getchar();
+
+    //getchar();
 
     return 0;
 }
